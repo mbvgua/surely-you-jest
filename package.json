@@ -4,7 +4,7 @@
   "description": "the one about testing in jest",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest  --watch --coverage --verbose",
     "test:watch": "jest --watch"
   },
   "repository": {
