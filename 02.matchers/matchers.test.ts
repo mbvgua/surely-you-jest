@@ -1,5 +1,31 @@
 import { sum,dummyFunc } from "./matchers"
 
+// COMMON MATCHERS
+describe('common matchers',()=>{
+    test('sum of 1 and 1 equals 2',()=>{
+        // Act
+        const num1:number = 1
+        const num2:number = 1
+        const result:number = 2
+
+        // Arrange
+        const expectedResult = sum(num1,num2)
+
+        // Assert
+        expect(expectedResult).toBe(result)
+    })
+
+    test('object assignment',()=>{
+        // Act
+        // Arrange
+        // Assert
+    })
+})
+
+
+
+
+/*
 // EXACT EQUALITY
 describe('test for exact equality',()=>{
 
@@ -138,3 +164,5 @@ describe('testing for errors thrown',()=>{
         expect(()=> dummyFunc()).not.toThrow(/^Wrong input$/)    //match exact input with regex
     })
 })
+
+*/

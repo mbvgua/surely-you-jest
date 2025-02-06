@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1732791931751" clover="3.2.0">
-  <project timestamp="1732791931751" name="All files">
-    <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2" elements="6" coveredelements="6" complexity="0" loc="4" ncloc="4" packages="1" files="1" classes="1"/>
-    <file name="matchers.ts" path="/home/daagi/Desktop/dwella.org/_aid/surely-you-jest/2.matchers/matchers.ts">
-      <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
-      <line num="3" count="1" type="stmt"/>
-      <line num="4" count="11" type="stmt"/>
-      <line num="8" count="1" type="stmt"/>
-      <line num="10" count="8" type="stmt"/>
-    </file>
+<coverage generated="1738872448042" clover="3.2.0">
+  <project timestamp="1738872448042" name="All files">
+    <metrics statements="12" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="5" elements="18" coveredelements="16" complexity="0" loc="12" ncloc="12" packages="2" files="2" classes="2"/>
+    <package name="01.intro">
+      <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+      <file name="app.ts" path="/home/daagi/Desktop/coding/surely-you-jest/01.intro/app.ts">
+        <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="02.matchers">
+      <metrics statements="4" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+      <file name="matchers.ts" path="/home/daagi/Desktop/coding/surely-you-jest/02.matchers/matchers.ts">
+        <metrics statements="4" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
+      </file>
+    </package>
   </project>
 </coverage>

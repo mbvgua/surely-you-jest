@@ -1,5 +1,4 @@
-import { describe,expect,test } from '@jest/globals'
-import { divide, subtract, sum } from './app'
+import { divide, subtract, sum, multiply } from './app'
 
 
 describe('math functions module',()=>{
@@ -41,6 +40,19 @@ describe('math functions module',()=>{
         const result = divide(num1,num2)
 
         // Assert
+        expect(result).toBe(expectedResult)
+    })
+
+    test('multiply 3 by 3 to equal 9', ()=>{
+        // Arrange
+        const num1:number = 3
+        const num2:number = 3
+        const expectedResult:number = 9
+
+        // Assert
+        const result = multiply(num1, num2)
+
+        // Act
         expect(result).toBe(expectedResult)
     })
 })
