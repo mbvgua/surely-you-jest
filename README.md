@@ -1,2 +1,3 @@
 # surely-you-jest
-the one about testing with Jest
+
+testing a simple API with jest

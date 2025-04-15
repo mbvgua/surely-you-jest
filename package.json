@@ -4,8 +4,11 @@
   "description": "the one about testing in jest",
   "main": "index.js",
   "scripts": {
+    "test:watch": "jest --watch",
     "test": "jest  --watch --coverage --verbose",
-    "test:watch": "jest --watch"
+    "start:build":"tsc -w",
+    "start:run":"nodemon dist/server.js",
+    "start":"concurrently npm:start:*"
   },
   "repository": {
     "type": "git",
@@ -23,17 +26,13 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.26.0",
     "@jest/globals": "^29.7.0",
-    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
-    "@types/joi": "^17.2.2",
-    "@types/mssql": "^9.1.5",
-    "bcrypt": "^5.1.1",
     "express": "^4.21.1",
-    "joi": "^17.13.3",
-    "mssql": "^11.0.1",
     "ts-jest": "^29.2.5"
   },
   "dependencies": {
-    "@types/jest": "^29.5.14"
+    "@types/jest": "^29.5.14",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9"
   }
 }
