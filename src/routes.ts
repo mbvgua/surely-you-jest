@@ -38,7 +38,7 @@ router.post('/login', async(request:Request, response:Response)=>{
         if (user && user.length > 0){
             return response.status(200).json({success:'You have successfuly logged in!'})
         }
-        return response.status(200).json({error:'Incorect username or password, try again?'})
+        return response.status(400).json({error:'Incorect username or password, try again?'})
     } catch (error) {
         return response.status(500).json({error:error})
     }
@@ -55,7 +55,7 @@ router.get('/get-users',async (request:Request, response:Response) =>{
         if (users && users.length > 0){
             return response.status(200).json({success:'All users in db: ',users})
         }
-        return response.status(400).json({success:'Currently no users in the db.'})
+        return response.status(400).json({error:'Currently no users in the db.'})
         
     } catch (error) {
         return response.status(500).json({error:error})

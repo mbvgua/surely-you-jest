@@ -23,7 +23,7 @@ describe("[app setup]", () => {
     test("unkown routes get 404 error handler", () => __awaiter(void 0, void 0, void 0, function* () {
         const randomn_string = 'qwewrqdasas';
         const response = yield request(app_1.default).get(`/${randomn_string}`);
-        expect(response.status).toBe(404);
+        expect(response.statusCode).toBe(404);
     }));
     // parse-json in request body
 });
