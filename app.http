@@ -1,1 +1,48 @@
-http://localhost:4000/
+# register new user
+POST http://localhost:5000/register
+Content-Type: application/json
+
+{
+    "name":"Biggie",
+    "email":"biggie@gmail.com",
+    "password":"Biggie@2025"
+}
+
+
+###
+# login existing user
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "name":"Biggie",
+    "password":"Biggie@2025"
+}
+
+
+###
+# get all users
+GET http://localhost:5000/get-users
+
+
+###
+# get user by id
+GET http://localhost:5000/get/2
+
+
+###
+# update user by id
+PATCH http://localhost:5000/update/7
+Content-Type: application/json
+
+{
+    "name":"Big Man",
+    "email":"biggie@gmail.com",
+    "password":"Biggie@2025"
+}
+
+###
+# delete user by id
+DELETE http://localhost:5000/delete/7
+
+###
