@@ -111,4 +111,8 @@ router.delete('/delete/:id', (request, response) => __awaiter(void 0, void 0, vo
         return response.status(500).json({ error: error });
     }
 }));
+// 404 routes
+router.get('*', (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    response.status(404).json({ error: 'Oops! Route does not exist. Try something different?' });
+}));
 exports.default = router;

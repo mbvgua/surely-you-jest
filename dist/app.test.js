@@ -14,12 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const supertest_1 = __importDefault(require("supertest"));
-const request = (0, supertest_1.default)(app_1.default);
+const request = supertest_1.default;
 describe("[app setup]", () => {
-    test("the server running", () => __awaiter(void 0, void 0, void 0, function* () {
+    test("the server is running", () => __awaiter(void 0, void 0, void 0, function* () {
         expect(app_1.default).toBeDefined();
     }));
     // database connection is successful
-    // unkown routes get 404 error
+    test("unkown routes get 404 error handler", () => __awaiter(void 0, void 0, void 0, function* () {
+        const randomn_string = 'qwewrqdasas';
+        const response = yield request(app_1.default).get(`/${randomn_string}`);
+        expect(response.status).toBe(404);
+    }));
     // parse-json in request body
 });

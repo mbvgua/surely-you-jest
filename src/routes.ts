@@ -131,4 +131,10 @@ router.delete('/delete/:id',async(request:Request<{id:string}>,response:Response
     }
 })
 
+
+// 404 routes
+router.get('*', async(request:Request, response:Response) =>{
+    response.status(404).json({error:'Oops! Route does not exist. Try something different?'})
+})
+
 export default router

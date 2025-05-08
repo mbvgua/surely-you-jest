@@ -73,3 +73,10 @@ To get the setup the testing environment and run the test command:
     $ npm test
 ```
 
+## Project Resources
+
+This section will include resources that I used to learn the process of automated testing better;
+
+- [zellwk](https://zellwk.com/blog/endpoint-testing/)
+- [anstack](https://www.antstack.com/blog/mastering-database-testing-with-jest-and-super-test-a-hands-on-approach-for-postgre-sql/)
+
