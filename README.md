@@ -75,7 +75,7 @@ To get the setup the testing environment and run the test command:
 
 ## Project Resources
 
-This section will include resources that I used to learn the process of automated testing better;
+Some helpful resources that guided my thinking were;
 
 - [zellwk](https://zellwk.com/blog/endpoint-testing/)
 - [antstack](https://www.antstack.com/blog/mastering-database-testing-with-jest-and-super-test-a-hands-on-approach-for-postgre-sql/)

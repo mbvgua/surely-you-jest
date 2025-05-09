@@ -3,7 +3,7 @@ import app from "./app";
 import { Users } from "./models";
 import { pool } from "./db";
 
-const request = supertest
+const api = supertest(app)
 
 // set user details
 const dummyUser:Users = {
@@ -13,31 +13,46 @@ const dummyUser:Users = {
     password:'Sentinel@25'
 }
 
+// setup the teardown
+beforeAll(()=>{
+    // use a test pool
+    pool.query(
+        `DELETE FROM users;`
+    )
+})
+
+afterAll(()=>{
+    pool.query(
+        `DELETE FROM users;`
+    )
+})
+
+
 describe('[routes setup]', ()=>{
-    // setup the teardown
-    beforeAll(()=>{
-        pool.query(
-            `DELETE FROM users;`
-        )
-    })
-
-    // afterAll(()=>{
-    //     pool.query(
-    //         `DELETE FROM users;`
-    //     )
-    // })
-
 
     describe('1.user registration endpoint', ()=>{
 
         test('register new users with name,email and password', async()=>{
             // 1.arrange 2.act 3.assert            
-            const registerUser = await request(app).post('/register').send(dummyUser)
+            const registerUser = await api.post('/register').send(dummyUser)
             expect(registerUser.statusCode).toBe(200)
             expect(registerUser.body).toBeDefined()
             expect(registerUser.body).toEqual({
                 success:'You have successfuly created a new user!'
-            })  
+            })
+        })
+
+        test('user data in database matches the dummyUser values', async()=>{
+            // 1.arrange 2.act 3.assert
+            const [rows] = await pool.query(
+                `SELECT * FROM users WHERE name='${dummyUser.name}';`
+            )
+            const user = rows as Array<Users>
+            expect(user).toBeDefined()
+            expect(user[0].name).toBe(`${dummyUser.name}`)
+            expect(user[0].email).toBe(`${dummyUser.email}`)
+            expect(user[0].password).toBe(`${dummyUser.password}`)
+            
         })
     
     })
@@ -47,7 +62,7 @@ describe('[routes setup]', ()=>{
 
         test('login existing users with valid name and password', async()=>{
             // 1.arrange 2.act 3.assert
-            const loginUser = await request(app).post('/login').send(dummyUser)
+            const loginUser = await api.post('/login').send(dummyUser)
             expect(loginUser.statusCode).toBe(200)
             expect(loginUser.body).toMatchObject({
                     success:'You have successfuly logged in!',
@@ -62,7 +77,7 @@ describe('[routes setup]', ()=>{
                 email:'qwerty@gmai.com',
                 password:'Qwerty25'
             }
-            const loginUser = await request(app).post('/login').send(wrongUser)
+            const loginUser = await api.post('/login').send(wrongUser)
             expect(loginUser.statusCode).toBe(400)
             expect(loginUser.body).toMatchObject({
                 error:'Incorect username or password, try again?'
@@ -76,13 +91,13 @@ describe('[routes setup]', ()=>{
 
         test('valid id will return existing user', async()=>{
             // 1.arrange 2.act 3.assert
-            const [getThisId] = await pool.query(
+            const [rows] = await pool.query(
                 `SELECT * FROM users WHERE name='${dummyUser.name}';`
             )
-            const user = getThisId as Array<Users>
+            const user = rows as Array<Users>
             const id = user[0].id
 
-            const getUserById = await request(app).get(`/get/'${id}'`)
+            const getUserById = await api.get(`/get/'${id}'`)
 
             expect(getUserById.statusCode).toBe(200)
             expect(getUserById.body).toMatchObject({
@@ -94,7 +109,7 @@ describe('[routes setup]', ()=>{
         test('failing test with invalid id that returns an error', async()=>{
             const id = (Math.random()*100).toFixed()
             // console.log(id)
-            const getUserById = await request(app).get(`/get/${id}`)
+            const getUserById = await api.get(`/get/${id}`)
             
             expect(getUserById.statusCode).toBe(400)
             expect(getUserById.body).toMatchObject({
@@ -109,10 +124,10 @@ describe('[routes setup]', ()=>{
 
         test('update user credentials with valid id', async()=>{
             // 1.arrange 2.act 3.assert
-            const [getThisId] = await pool.query(
+            const [rows] = await pool.query(
                 `SELECT * FROM users WHERE name='${dummyUser.name}';`
             )
-            const user = getThisId as Array<Users>
+            const user = rows as Array<Users>
             const id = user[0].id
 
             const newUser:Users = {
@@ -121,7 +136,7 @@ describe('[routes setup]', ()=>{
                 password:'Lance@25'
             }
 
-            const updateUser = await request(app).patch(`/update/${id}`).send(newUser)
+            const updateUser = await api.patch(`/update/${id}`).send(newUser)
             expect(updateUser.statusCode).toBe(200)
             expect(updateUser.body).toBeDefined()
             expect(updateUser.body).toMatchObject({
@@ -140,7 +155,7 @@ describe('[routes setup]', ()=>{
                 password:'Lance@25'
             }
 
-            const updateUser = await request(app).patch(`/update/${id}`).send(newUser)
+            const updateUser = await api.patch(`/update/${id}`).send(newUser)
             expect(updateUser.statusCode).toBe(400)
             expect(updateUser.body).toMatchObject({
                 error:'Failed updating details, try again?'
@@ -153,7 +168,7 @@ describe('[routes setup]', ()=>{
 
         test('return users if present in system', async()=>{
             // 1.act 2.arrange 3.assert
-            const getUsers = await request(app).get('/get-users')
+            const getUsers = await api.get('/get-users')
             expect(getUsers.statusCode).toBe(200)
             expect(getUsers.body).toBeDefined()
             expect(getUsers.body).toMatchObject({
@@ -164,7 +179,7 @@ describe('[routes setup]', ()=>{
 
         test('failing test that returns error if no users in system', async()=>{
             // 1.act 2.arrange 3.assert
-            const getUsers = await request(app).get('/get-users')
+            const getUsers = await api.get('/get-users')
             expect(getUsers.statusCode).toBe(400)
             expect(getUsers.body).toMatchObject({
                 error:'Currently no users in the db.'
@@ -178,18 +193,18 @@ describe('[routes setup]', ()=>{
         // setup teardown
         // restore original dummy user
         beforeEach(async()=>{
-            const registerUser = await request(app).post(`/register`).send(dummyUser)
+            const registerUser = await api.post(`/register`).send(dummyUser)
         })
 
         test('delete user from system with valid id', async()=>{
             // 1.arrange 2.act 3.assert
-            const [getThisId] = await pool.query(
+            const [rows] = await pool.query(
                 `SELECT * FROM users WHERE name='${dummyUser.name}';`
             )
-            const user = getThisId as Array<Users>
+            const user = rows as Array<Users>
             const id = user[0].id
 
-            const deleteUser = await request(app).delete(`/delete/${id}`)
+            const deleteUser = await api.delete(`/delete/${id}`)
             expect(deleteUser.statusCode).toBe(200)
             expect(deleteUser.body).toMatchObject({
                 success:'You have successfuly deleted your account!'
@@ -199,7 +214,7 @@ describe('[routes setup]', ()=>{
         test('deleting user with invalid will throw an erorr', async()=>{
             // 1.arrange 2.act 3.assert
             const id = (Math.random()*100).toFixed()
-            const deleteUser = await request(app).delete(`/delete/${id}`)
+            const deleteUser = await api.delete(`/delete/${id}`)
             expect(deleteUser.statusCode).toBe(400)
             expect(deleteUser.body).toMatchObject({
                 error:'That user does not exist, try again?'

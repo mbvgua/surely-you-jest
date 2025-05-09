@@ -1,5 +1,6 @@
 # bloated node modules
 node_modules/
+dist/
 
 # environment variables
 .env

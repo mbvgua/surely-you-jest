@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const supertest_1 = __importDefault(require("supertest"));
 const app_1 = __importDefault(require("./app"));
 const db_1 = require("./db");
-const request = supertest_1.default;
+const api = (0, supertest_1.default)(app_1.default);
 // set user details
 const dummyUser = {
     // id:'17',
@@ -23,31 +23,39 @@ const dummyUser = {
     email: 'sentinel@gmail.com',
     password: 'Sentinel@25'
 };
+// setup the teardown
+beforeAll(() => {
+    // use a test pool
+    db_1.pool.query(`DELETE FROM users;`);
+});
+afterAll(() => {
+    db_1.pool.query(`DELETE FROM users;`);
+});
 describe('[routes setup]', () => {
-    // setup the teardown
-    beforeAll(() => {
-        db_1.pool.query(`DELETE FROM users;`);
-    });
-    // afterAll(()=>{
-    //     pool.query(
-    //         `DELETE FROM users;`
-    //     )
-    // })
     describe('1.user registration endpoint', () => {
         test('register new users with name,email and password', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.arrange 2.act 3.assert            
-            const registerUser = yield request(app_1.default).post('/register').send(dummyUser);
+            const registerUser = yield api.post('/register').send(dummyUser);
             expect(registerUser.statusCode).toBe(200);
             expect(registerUser.body).toBeDefined();
             expect(registerUser.body).toEqual({
                 success: 'You have successfuly created a new user!'
             });
         }));
+        test('user data in database matches the dummyUser values', () => __awaiter(void 0, void 0, void 0, function* () {
+            // 1.arrange 2.act 3.assert
+            const [rows] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
+            const user = rows;
+            expect(user).toBeDefined();
+            expect(user[0].name).toBe(`${dummyUser.name}`);
+            expect(user[0].email).toBe(`${dummyUser.email}`);
+            expect(user[0].password).toBe(`${dummyUser.password}`);
+        }));
     });
     describe('2.user login endpoint', () => {
         test('login existing users with valid name and password', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.arrange 2.act 3.assert
-            const loginUser = yield request(app_1.default).post('/login').send(dummyUser);
+            const loginUser = yield api.post('/login').send(dummyUser);
             expect(loginUser.statusCode).toBe(200);
             expect(loginUser.body).toMatchObject({
                 success: 'You have successfuly logged in!',
@@ -60,7 +68,7 @@ describe('[routes setup]', () => {
                 email: 'qwerty@gmai.com',
                 password: 'Qwerty25'
             };
-            const loginUser = yield request(app_1.default).post('/login').send(wrongUser);
+            const loginUser = yield api.post('/login').send(wrongUser);
             expect(loginUser.statusCode).toBe(400);
             expect(loginUser.body).toMatchObject({
                 error: 'Incorect username or password, try again?'
@@ -70,10 +78,10 @@ describe('[routes setup]', () => {
     describe('3.get specific user with an id', () => {
         test('valid id will return existing user', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.arrange 2.act 3.assert
-            const [getThisId] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
-            const user = getThisId;
+            const [rows] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
+            const user = rows;
             const id = user[0].id;
-            const getUserById = yield request(app_1.default).get(`/get/'${id}'`);
+            const getUserById = yield api.get(`/get/'${id}'`);
             expect(getUserById.statusCode).toBe(200);
             expect(getUserById.body).toMatchObject({
                 success: 'Here is the user: '
@@ -82,7 +90,7 @@ describe('[routes setup]', () => {
         test('failing test with invalid id that returns an error', () => __awaiter(void 0, void 0, void 0, function* () {
             const id = (Math.random() * 100).toFixed();
             // console.log(id)
-            const getUserById = yield request(app_1.default).get(`/get/${id}`);
+            const getUserById = yield api.get(`/get/${id}`);
             expect(getUserById.statusCode).toBe(400);
             expect(getUserById.body).toMatchObject({
                 error: 'There is no user with that id. Try again?'
@@ -92,15 +100,15 @@ describe('[routes setup]', () => {
     describe('4.update user details', () => {
         test('update user credentials with valid id', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.arrange 2.act 3.assert
-            const [getThisId] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
-            const user = getThisId;
+            const [rows] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
+            const user = rows;
             const id = user[0].id;
             const newUser = {
                 name: 'Sir Lancelot',
                 email: 'lance@gmail.com',
                 password: 'Lance@25'
             };
-            const updateUser = yield request(app_1.default).patch(`/update/${id}`).send(newUser);
+            const updateUser = yield api.patch(`/update/${id}`).send(newUser);
             expect(updateUser.statusCode).toBe(200);
             expect(updateUser.body).toBeDefined();
             expect(updateUser.body).toMatchObject({
@@ -116,7 +124,7 @@ describe('[routes setup]', () => {
                 email: 'lance@gmail.com',
                 password: 'Lance@25'
             };
-            const updateUser = yield request(app_1.default).patch(`/update/${id}`).send(newUser);
+            const updateUser = yield api.patch(`/update/${id}`).send(newUser);
             expect(updateUser.statusCode).toBe(400);
             expect(updateUser.body).toMatchObject({
                 error: 'Failed updating details, try again?'
@@ -126,7 +134,7 @@ describe('[routes setup]', () => {
     describe('5.get all users in system endpoint', () => {
         test('return users if present in system', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.act 2.arrange 3.assert
-            const getUsers = yield request(app_1.default).get('/get-users');
+            const getUsers = yield api.get('/get-users');
             expect(getUsers.statusCode).toBe(200);
             expect(getUsers.body).toBeDefined();
             expect(getUsers.body).toMatchObject({
@@ -135,7 +143,7 @@ describe('[routes setup]', () => {
         }));
         test('failing test that returns error if no users in system', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.act 2.arrange 3.assert
-            const getUsers = yield request(app_1.default).get('/get-users');
+            const getUsers = yield api.get('/get-users');
             expect(getUsers.statusCode).toBe(400);
             expect(getUsers.body).toMatchObject({
                 error: 'Currently no users in the db.'
@@ -146,14 +154,14 @@ describe('[routes setup]', () => {
         // setup teardown
         // restore original dummy user
         beforeEach(() => __awaiter(void 0, void 0, void 0, function* () {
-            const registerUser = yield request(app_1.default).post(`/register`).send(dummyUser);
+            const registerUser = yield api.post(`/register`).send(dummyUser);
         }));
         test('delete user from system with valid id', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.arrange 2.act 3.assert
-            const [getThisId] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
-            const user = getThisId;
+            const [rows] = yield db_1.pool.query(`SELECT * FROM users WHERE name='${dummyUser.name}';`);
+            const user = rows;
             const id = user[0].id;
-            const deleteUser = yield request(app_1.default).delete(`/delete/${id}`);
+            const deleteUser = yield api.delete(`/delete/${id}`);
             expect(deleteUser.statusCode).toBe(200);
             expect(deleteUser.body).toMatchObject({
                 success: 'You have successfuly deleted your account!'
@@ -162,7 +170,7 @@ describe('[routes setup]', () => {
         test('deleting user with invalid will throw an erorr', () => __awaiter(void 0, void 0, void 0, function* () {
             // 1.arrange 2.act 3.assert
             const id = (Math.random() * 100).toFixed();
-            const deleteUser = yield request(app_1.default).delete(`/delete/${id}`);
+            const deleteUser = yield api.delete(`/delete/${id}`);
             expect(deleteUser.statusCode).toBe(400);
             expect(deleteUser.body).toMatchObject({
                 error: 'That user does not exist, try again?'
