@@ -73,3 +73,14 @@ To get the setup the testing environment and run the test command:
     $ npm test
 ```
 
+## Project Resources
+
+Some helpful resources that guided my thinking were;
+
+- [zellwk](https://zellwk.com/blog/endpoint-testing/)
+- [antstack](https://www.antstack.com/blog/mastering-database-testing-with-jest-and-super-test-a-hands-on-approach-for-postgre-sql/)
+- [free-code-camp](https://www.freecodecamp.org/news/end-point-testing/)
+- [bogs tech](https://bognov.tech/mern-stack-test-nodejs-and-express-with-jest#heading-refactoring-get-calls)
+- [ermias on medium](https://medium.com/@it.ermias.asmare/node-js-express-with-jest-and-supertest-e58aaf4c4514)
+- [ali](https://allahisrabb.hashnode.dev/mastering-jest-for-expressjs-api-testing)
+
