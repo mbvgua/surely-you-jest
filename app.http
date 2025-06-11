@@ -3,8 +3,8 @@ POST http://localhost:5000/register
 Content-Type: application/json
 
 {
-    "name":"Biggie",
-    "email":"biggie@gmail.com",
+    "name":"Marka",
+    "email":"marksa@gmail.com",
     "password":"Biggie@2025"
 }
 
@@ -27,7 +27,7 @@ GET http://localhost:5000/get-users
 
 ###
 # get user by id
-GET http://localhost:5000/get/22
+GET http://localhost:5000/get/2
 
 
 ###
@@ -46,3 +46,5 @@ Content-Type: application/json
 DELETE http://localhost:5000/delete/7
 
 ###
+# wrong route
+GET http://localhost:5000/cqwdcaxa
