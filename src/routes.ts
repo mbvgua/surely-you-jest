@@ -18,9 +18,9 @@ router.post("/register", async (request: Request, response: Response) => {
             );`,
     );
 
-    return response.status(200).json({
+    return response.status(201).json({
       status: "success",
-      code: 200,
+      code: 201,
       message: "You have successfuly created a new user!",
       data: {
         user: {
@@ -35,8 +35,7 @@ router.post("/register", async (request: Request, response: Response) => {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message:
-        "An internal server error occurred while processing the request.",
+      message: "An internal server error occurred while processing the request.",
       data: error,
       metadata: {},
     });
@@ -53,10 +52,10 @@ router.post("/login", async (request: Request, response: Response) => {
     );
     const user = loginUser as Array<Users>;
     if (user && user.length > 0) {
-      return response.status(200).json({
+      return response.status(201).json({
         status: "success",
-        code: 200,
-        message: "You have successfuly logged in!",
+        code: 201,
+        message: "You have successfully logged in!",
         data: {
           user: {
             id: `${user[0].id}`,
@@ -68,9 +67,9 @@ router.post("/login", async (request: Request, response: Response) => {
         metadata: {},
       });
     }
-    return response.status(400).json({
+    return response.status(422).json({
       status: "error",
-      code: 400,
+      code: 422,
       message: "Incorect username or password, try again?",
       data: {
         user: {
@@ -84,8 +83,7 @@ router.post("/login", async (request: Request, response: Response) => {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message:
-        "An internal server error has occurred while processing your request",
+      message: "An internal server error has occurred while processing your request",
       data: error,
       metadata: {},
     });
@@ -123,8 +121,7 @@ router.get("/get-users", async (request: Request, response: Response) => {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message:
-        "An internal server error occurred while processing your request.",
+      message: "An internal server error occurred while processing your request.",
       data: error,
       metadata: {},
     });
@@ -132,9 +129,7 @@ router.get("/get-users", async (request: Request, response: Response) => {
 });
 
 // getUserById
-router.get(
-  "/get/:id",
-  async (request: Request<{ id: string }>, response: Response) => {
+router.get("/get/:id", async (request: Request<{ id: string }>, response: Response) => {
     const id = request.params.id;
     try {
       const [getUserById] = await pool.query(
@@ -162,7 +157,9 @@ router.get(
         code: 404,
         message: "There is no user with that id. Try again?",
         data: {
-          user: {},
+          user: {
+            id: `${id}`,
+         },
         },
         metadata: {},
       });
@@ -170,8 +167,7 @@ router.get(
       return response.status(500).json({
         status: "error",
         code: 500,
-        message:
-          "An internal server error occured while processing your request",
+        message: "An internal server error occured while processing your request",
         data: error,
         metadata: {},
       });
@@ -180,9 +176,7 @@ router.get(
 );
 
 // updateUser
-router.put(
-  "/update/:id",
-  async (request: Request<{ id: string }>, response: Response) => {
+router.put("/update/:id", async (request: Request<{ id: string }>, response: Response) => {
     try {
       const id = request.params.id;
       const { name, email, password } = request.body;
@@ -200,9 +194,9 @@ router.put(
                 WHERE id='${id}'
                 ;`,
         );
-        return response.status(200).json({
+        return response.status(201).json({
           status: "success",
-          code: 200,
+          code: 201,
           message: "You have successfully updated your details.",
           data: {
             user: {
@@ -233,8 +227,7 @@ router.put(
       return response.status(500).json({
         status: "error",
         code: 500,
-        message:
-          "An internal server error occurred while processing your request",
+        message: "An internal server error occurred while processing your request",
         data: error,
         metadata: {},
       });
@@ -243,9 +236,7 @@ router.put(
 );
 
 // deleteUser
-router.delete(
-  "/delete/:id",
-  async (request: Request<{ id: string }>, response: Response) => {
+router.delete("/delete/:id", async (request: Request<{ id: string }>, response: Response) => {
     try {
       const id = request.params.id;
       const [deleteUser] = await pool.query(
@@ -254,17 +245,12 @@ router.delete(
       const user = deleteUser as Array<Users>;
       if (user.length > 0) {
         await pool.query(`DELETE FROM users WHERE id=${user[0].id};`);
-        return response.status(200).json({
+        return response.status(204).json({
           status: "error",
-          code: 200,
+          code: 204,
           message: "You have successfuly deleted your account!",
           data: {
-            user: {
-              id: `${id}`,
-              name: `${user[0].name}`,
-              email: `${user[0].email}`,
-              password: `${user[0].password}`,
-            },
+            user: {},
           },
           metadata: {},
         });
@@ -276,9 +262,6 @@ router.delete(
         data: {
           user: {
             id: `${id}`,
-            name: `${user[0].name}`,
-            email: `${user[0].email}`,
-            password: `${user[0].password}`,
           },
         },
         metadata: {},
@@ -287,8 +270,7 @@ router.delete(
       return response.status(500).json({
         status: "error",
         code: 500,
-        message:
-          "An internal server error occurred while processing your request",
+        message: "An internal server error occurred while processing your request",
         data: error,
         metadata: {},
       });
