@@ -59,7 +59,9 @@ router.post("/login", async (request: Request, response: Response) => {
         message: "You have successfuly logged in!",
         data: {
           user: {
+            id: `${user[0].id}`,
             name: `${name}`,
+            email: `${user[0].email}`,
             password: `${password}`,
           },
         },
@@ -103,7 +105,9 @@ router.get("/get-users", async (request: Request, response: Response) => {
         data: {
           users: users,
         },
-        metadata: {},
+        metadata: {
+          totalUsers: users.length,
+        },
       });
     }
     return response.status(404).json({
@@ -176,7 +180,7 @@ router.get(
 );
 
 // updateUser
-router.patch(
+router.put(
   "/update/:id",
   async (request: Request<{ id: string }>, response: Response) => {
     try {
