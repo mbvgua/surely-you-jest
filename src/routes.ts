@@ -1,140 +1,292 @@
-import { Request,Response } from "express";
+import { Request, Response } from "express";
 import { Router } from "express";
-import { pool } from './db'
+import { pool } from "./db";
 import { Users } from "./models";
 
-const router = Router()
-
+const router = Router();
 
 // registerUser
-router.post('/register', async(request:Request, response:Response)=>{
-    try {
-        const {name,email,password} = request.body
-        const registerUser = await pool.query(
-            `INSERT INTO users VALUES(
+router.post("/register", async (request: Request, response: Response) => {
+  try {
+    const { name, email, password } = request.body;
+    const registerUser = await pool.query(
+      `INSERT INTO users VALUES(
             DEFAULT,
             '${name}',
             '${email}',
             '${password}'
-            );`
-        )
-        return response.status(200).json({success:'You have successfuly created a new user!'})
-        
-    } catch (error) {
-        return response.status(500).json({error:error})
-    }
-})
+            );`,
+    );
 
+    return response.status(201).json({
+      status: "success",
+      code: 201,
+      message: "You have successfuly created a new user!",
+      data: {
+        user: {
+          name: `${name}`,
+          email: `${email}`,
+          password: `${password}`,
+        },
+      },
+      metadata: {},
+    });
+  } catch (error) {
+    return response.status(500).json({
+      status: "error",
+      code: 500,
+      message: "An internal server error occurred while processing the request.",
+      data: error,
+      metadata: {},
+    });
+  }
+});
 
 // loginUser
-router.post('/login', async(request:Request, response:Response)=>{
-    try {
-        const {name,password} = request.body
-        const [loginUser] = await pool.query(
-            `SELECT * FROM users WHERE
-             name='${name}' AND password='${password}';`
-        )
-        const user = loginUser as Array<Users>
-        if (user && user.length > 0){
-            return response.status(200).json({success:'You have successfuly logged in!'})
-        }
-        return response.status(400).json({error:'Incorect username or password, try again?'})
-    } catch (error) {
-        return response.status(500).json({error:error})
+router.post("/login", async (request: Request, response: Response) => {
+  try {
+    const { name, password } = request.body;
+    const [loginUser] = await pool.query(
+      `SELECT * FROM users WHERE
+             name='${name}' AND password='${password}';`,
+    );
+    const user = loginUser as Array<Users>;
+    if (user && user.length > 0) {
+      return response.status(201).json({
+        status: "success",
+        code: 201,
+        message: "You have successfully logged in!",
+        data: {
+          user: {
+            id: `${user[0].id}`,
+            name: `${name}`,
+            email: `${user[0].email}`,
+            password: `${password}`,
+          },
+        },
+        metadata: {},
+      });
     }
-})
-
+    return response.status(422).json({
+      status: "error",
+      code: 422,
+      message: "Incorect username or password, try again?",
+      data: {
+        user: {
+          name: `${name}`,
+          password: `${password}`,
+        },
+      },
+      metadata: {},
+    });
+  } catch (error) {
+    return response.status(500).json({
+      status: "error",
+      code: 500,
+      message: "An internal server error has occurred while processing your request",
+      data: error,
+      metadata: {},
+    });
+  }
+});
 
 // getUsers
-router.get('/get-users',async (request:Request, response:Response) =>{
-    try {
-        const [getUsers] = await pool.query(
-            `SELECT * FROM users;`
-        )
-        const users = getUsers as Array<Users>
-        if (users && users.length > 0){
-            return response.status(200).json({success:'All users in db: ',users})
-        }
-        return response.status(400).json({error:'Currently no users in the db.'})
-        
-    } catch (error) {
-        return response.status(500).json({error:error})
+router.get("/get-users", async (request: Request, response: Response) => {
+  try {
+    const [getUsers] = await pool.query(`SELECT * FROM users;`);
+    const users = getUsers as Array<Users>;
+    if (users && users.length > 0) {
+      return response.status(200).json({
+        status: "success",
+        code: 200,
+        message: "Successfully retrieved all users from the database.",
+        data: {
+          users: users,
+        },
+        metadata: {
+          totalUsers: users.length,
+        },
+      });
     }
-})
-
+    return response.status(404).json({
+      status: "error",
+      code: 404,
+      message: "There are currently no users in the database! Try again later?",
+      data: {
+        users: {},
+      },
+      metadata: {},
+    });
+  } catch (error) {
+    return response.status(500).json({
+      status: "error",
+      code: 500,
+      message: "An internal server error occurred while processing your request.",
+      data: error,
+      metadata: {},
+    });
+  }
+});
 
 // getUserById
-router.get('/get/:id',async(request:Request<{id:string}>, response:Response) =>{
-    const id = request.params.id
+router.get("/get/:id", async (request: Request<{ id: string }>, response: Response) => {
+    const id = request.params.id;
     try {
-        const [getUserById] = await pool.query(
-            `SELECT * FROM users WHERE id=${id};`
-        )
-        const user = getUserById as Array<Users>
-        if (user && user.length > 0){
-            return response.status(200).json({success:'Here is the user: ',user})
-        }
-        return response.status(400).json({error:'There is no user with that id. Try again?'})
-        
+      const [getUserById] = await pool.query(
+        `SELECT * FROM users WHERE id=${id};`,
+      );
+      const user = getUserById as Array<Users>;
+      if (user && user.length > 0) {
+        return response.status(200).json({
+          status: "success",
+          code: 200,
+          message: `You have successfully retrieved user of id:${id} from the database`,
+          data: {
+            user: {
+              id: `${id}`,
+              name: `${user[0].name}`,
+              email: `${user[0].email}`,
+              password: `${user[0].password}`,
+            },
+          },
+          metadata: {},
+        });
+      }
+      return response.status(404).json({
+        status: "error",
+        code: 404,
+        message: "There is no user with that id. Try again?",
+        data: {
+          user: {
+            id: `${id}`,
+         },
+        },
+        metadata: {},
+      });
     } catch (error) {
-        return response.status(500).json({error:error})
-    }    
-})
-
+      return response.status(500).json({
+        status: "error",
+        code: 500,
+        message: "An internal server error occured while processing your request",
+        data: error,
+        metadata: {},
+      });
+    }
+  },
+);
 
 // updateUser
-router.patch('/update/:id',async(request:Request<{id:string}>,response:Response) =>{
+router.put("/update/:id", async (request: Request<{ id: string }>, response: Response) => {
     try {
-        const id = request.params.id
-        const {name,email,password} = request.body
-        const [updateUser] = await pool.query(
-            `SELECT * FROM users WHERE id='${id}';`
-        )
-        const user = updateUser as Array<Users>
+      const id = request.params.id;
+      const { name, email, password } = request.body;
+      const [updateUser] = await pool.query(
+        `SELECT * FROM users WHERE id='${id}';`,
+      );
+      const user = updateUser as Array<Users>;
 
-        if (user.length > 0){
-            await pool.query(
-                `UPDATE users SET 
+      if (user.length > 0) {
+        await pool.query(
+          `UPDATE users SET 
                 name='${name}',
                 email='${email}',
                 password='${password}' 
                 WHERE id='${id}'
-                ;`
-            )
-            return response.status(200).json({success:'You have successfully updated your details: '})
-        }
-        return response.status(400).json({error:'Failed updating details, try again?'})
+                ;`,
+        );
+        return response.status(201).json({
+          status: "success",
+          code: 201,
+          message: "You have successfully updated your details.",
+          data: {
+            user: {
+              id: `${id}`,
+              name: `${name}`,
+              email: `${email}`,
+              password: `${password}`,
+            },
+          },
+          metadata: {},
+        });
+      }
+      return response.status(404).json({
+        status: "error",
+        code: 404,
+        message: `User of id:${id} was not found. Failed updating details, try again later?`,
+        data: {
+          user: {
+            id: `${id}`,
+            name: `${name}`,
+            email: `${email}`,
+            password: `${password}`,
+          },
+        },
+        metadata: {},
+      });
     } catch (error) {
-        return response.status(500).json({error:error})
+      return response.status(500).json({
+        status: "error",
+        code: 500,
+        message: "An internal server error occurred while processing your request",
+        data: error,
+        metadata: {},
+      });
     }
-})
-
+  },
+);
 
 // deleteUser
-router.delete('/delete/:id',async(request:Request<{id:string}>,response:Response) =>{
+router.delete("/delete/:id", async (request: Request<{ id: string }>, response: Response) => {
     try {
-        const id = request.params.id
-        const [deleteUser] = await pool.query(
-            `SELECT * FROM users WHERE id=${id};`
-        )
-        const user = deleteUser as Array<Users>
-        if(user.length > 0){
-            await pool.query(
-                `DELETE FROM users WHERE id=${user[0].id};`
-            )
-            return response.status(200).json({success:'You have successfuly deleted your account!'})
-        }
-        return response.status(400).json({error:'That user does not exist, try again?'})
-        
+      const id = request.params.id;
+      const [deleteUser] = await pool.query(
+        `SELECT * FROM users WHERE id=${id};`,
+      );
+      const user = deleteUser as Array<Users>;
+      if (user.length > 0) {
+        await pool.query(`DELETE FROM users WHERE id=${user[0].id};`);
+        return response.status(204).json({
+          status: "error",
+          code: 204,
+          message: "You have successfuly deleted your account!",
+          data: {
+            user: {},
+          },
+          metadata: {},
+        });
+      }
+      return response.status(404).json({
+        status: "error",
+        code: 404,
+        message: "That user does not exist, try again?",
+        data: {
+          user: {
+            id: `${id}`,
+          },
+        },
+        metadata: {},
+      });
     } catch (error) {
-        return response.status(500).json({error:error})
+      return response.status(500).json({
+        status: "error",
+        code: 500,
+        message: "An internal server error occurred while processing your request",
+        data: error,
+        metadata: {},
+      });
     }
-})
-
+  },
+);
 
 // 404 routes
-router.get('*', async(request:Request, response:Response) =>{
-    response.status(404).json({error:'Oops! Route does not exist. Try something different?'})
-})
+router.get("*", async (request: Request, response: Response) => {
+  response.status(404).json({
+    status: "error",
+    code: 404,
+    message: "Oops! That route does not exist. Try something different?",
+    data: {},
+    metadata: {},
+  });
+});
 
-export default router
+export default router;

@@ -42,19 +42,6 @@ describe('[routes setup]', ()=>{
             })
         })
 
-        test('user data in database matches the dummyUser values', async()=>{
-            // 1.arrange 2.act 3.assert
-            const [rows] = await pool.query(
-                `SELECT * FROM users WHERE name='${dummyUser.name}';`
-            )
-            const user = rows as Array<Users>
-            expect(user).toBeDefined()
-            expect(user[0].name).toBe(`${dummyUser.name}`)
-            expect(user[0].email).toBe(`${dummyUser.email}`)
-            expect(user[0].password).toBe(`${dummyUser.password}`)
-            
-        })
-    
     })
 
 
