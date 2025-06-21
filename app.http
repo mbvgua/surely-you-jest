@@ -32,7 +32,7 @@ GET http://localhost:5000/get/2
 
 ###
 # update user by id
-PATCH http://localhost:5000/update/7
+PUT http://localhost:5000/update/5
 Content-Type: application/json
 
 {

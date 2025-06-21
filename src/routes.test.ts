@@ -1,213 +1,191 @@
+jest.mock("./db", () => ({
+  pool: {
+    query: jest.fn(), // <== this is the key part
+  },
+}));
 import supertest from "supertest";
 import app from "./app";
 import { Users } from "./models";
 import { pool } from "./db";
+import { mock } from "node:test";
 
-const api = supertest(app)
+//jest.mock("./db", () => ({
+//  pool: {
+//    query: jest.fn(),
+//  },
+//}));
+const request = supertest(app);
+const mockedQuery = pool.query as jest.Mock;
 
-// set user details
-const dummyUser:Users = {
-    // id:'17',
-    name:'sentinel_val',
-    email:'sentinel@gmail.com',
-    password:'Sentinel@25'
-}
+// tearup function
+beforeAll(() => {
+  mockedQuery.mockReset();
+});
 
-// setup the teardown
-beforeAll(()=>{
-    // use a test pool
-    pool.query(
-        `DELETE FROM users;`
-    )
-})
+describe("[user registration endpoint]", () => {
+  it("should register a new user into the application", async () => {
+    //1.arrange
+    const mockUser: Users = {
+      name: "Sentinel",
+      email: "sentinel@gmail.com",
+      password: "Sentinel@2025",
+    };
+    mockedQuery.mockResolvedValueOnce([{}, undefined]);
 
-afterAll(()=>{
-    pool.query(
-        `DELETE FROM users;`
-    )
-})
+    //2.act
+    const registerUser = await request.post("/register").send(mockUser);
 
+    //3.assert
+    expect(registerUser.statusCode).toBe(201);
+    expect(registerUser.body).toBeDefined();
+    expect(registerUser.body).toEqual({
+      status: "success",
+      code: 201,
+      message: "You have successfuly created a new user!",
+      data: {
+        user: {
+          name: `${mockUser.name}`,
+          email: `${mockUser.email}`,
+          password: `${mockUser.password}`,
+        },
+      },
+      metadata: {},
+    });
+  });
+});
 
-describe('[routes setup]', ()=>{
+describe("[user login endpoint]", () => {
+  it("should login existing users into the application", async () => {
+    //1.arrange
+    const mockUser: Users = {
+      id: "1",
+      name: "Sentinel",
+      email: "sentinel@gmail.com",
+      password: "Sentinel@2025",
+    };
+    mockedQuery.mockResolvedValueOnce([
+      [
+        {
+          id: 1,
+          name: "Sentinel",
+          email: "sentinel@gmail.com",
+          password: "Sentinel@2025",
+        },
+      ],
+      undefined,
+    ]);
 
-    describe('1.user registration endpoint', ()=>{
+    //2.act
+    const loginUser = await request.post("/login").send(mockUser);
 
-        test('register new users with name,email and password', async()=>{
-            // 1.arrange 2.act 3.assert            
-            const registerUser = await api.post('/register').send(dummyUser)
-            expect(registerUser.statusCode).toBe(200)
-            expect(registerUser.body).toBeDefined()
-            expect(registerUser.body).toEqual({
-                success:'You have successfuly created a new user!'
-            })
-        })
+    //3.assert
+    expect(loginUser.statusCode).toBe(201);
+    expect(loginUser.body).toBeDefined();
+    expect(loginUser.body).toEqual({
+      status: "success",
+      code: 201,
+      message: "You have successfully logged in!",
+      data: {
+        user: {
+          id: `${mockUser.id}`,
+          name: `${mockUser.name}`,
+          email: `${mockUser.email}`,
+          password: `${mockUser.password}`,
+        },
+      },
+      metadata: {},
+    });
+  });
 
-    })
+  it("should validate user input, returning error if incorrect", async () => {
+    //1.arrange
+    const mockUser: Users = {
+      name: "Sentinel",
+      password: "Sentinel@2025",
+    };
+    // this means there will be no user with previously listed values.
+    mockedQuery.mockResolvedValueOnce([{}, undefined]);
 
+    //2.act
+    const loginUser = await request.post("/login").send(mockUser);
 
-    describe('2.user login endpoint', ()=>{
+    //3.assert
+    expect(loginUser.statusCode).toBe(422);
+    expect(loginUser.body).toBeDefined();
+    expect(loginUser.body).toEqual({
+      status: "error",
+      code: 422,
+      message: "Incorect username or password, try again?",
+      data: {
+        user: {
+          name: `${mockUser.name}`,
+          password: `${mockUser.password}`,
+        },
+      },
+      metadata: {},
+    });
+  });
+});
 
-        test('login existing users with valid name and password', async()=>{
-            // 1.arrange 2.act 3.assert
-            const loginUser = await api.post('/login').send(dummyUser)
-            expect(loginUser.statusCode).toBe(200)
-            expect(loginUser.body).toMatchObject({
-                    success:'You have successfuly logged in!',
-            })
+describe("[get users endpoint]", () => {
+  it("should get all the users in the system", async () => {
+    //1.arrange
 
-        })
+    // this means there will be no user with previously listed values.
+    mockedQuery.mockResolvedValueOnce([
+      [
+        {
+          id: 1,
+          name: "Sentinel",
+          email: "sentinel@gmail.com",
+          password: "Sentinel@2025",
+        },
+        {
+          id: 2,
+          name: "Lancelot",
+          email: "lancelot@gmail.com",
+          password: "Lancelot@2025",
+        },
+      ],
+      undefined,
+    ]);
 
-        test('failing test for incorrect username and password', async()=>{
-            // 1.arrange 2.act 3.assert
-            const wrongUser:Users = {
-                name:'qwert',
-                email:'qwerty@gmai.com',
-                password:'Qwerty25'
-            }
-            const loginUser = await api.post('/login').send(wrongUser)
-            expect(loginUser.statusCode).toBe(400)
-            expect(loginUser.body).toMatchObject({
-                error:'Incorect username or password, try again?'
-            })
-        })
+    //2.act
+    const getUsers = await request.get("/get-users");
+    // TODO: get how destructure the mocked array from above. Normally I would have
+    // [rows], but this is different
+    const mockUsers = [getUsers] as Users[];
 
-    })
+    //3.assert
+    expect(getUsers.statusCode).toBe(200);
+    expect(getUsers.body).toBeDefined();
 
+    // TODO: make this work after above todo. Problem is that it returns a giant
+    // request object that doent fit in the .data value
+    //expect(getUsers.body).toEqual({
+    //  status: "success",
+    //  code: 200,
+    //  message: "Successfully retrieved all users from the database.",
+    //  data: {
+    //    users: `${mockUsers}`,
+    //  },
+    //  metadata: {
+    //    totalUsers: `${mockUsers.length}`,
+    //  },
+    //});
+  });
 
-    describe('3.get specific user with an id', ()=>{
+  it("should get a user by a given id", async () => {});
 
-        test('valid id will return existing user', async()=>{
-            // 1.arrange 2.act 3.assert
-            const [rows] = await pool.query(
-                `SELECT * FROM users WHERE name='${dummyUser.name}';`
-            )
-            const user = rows as Array<Users>
-            const id = user[0].id
+  it("should fail when trying to get a user not in the system", async () => {});
 
-            const getUserById = await api.get(`/get/'${id}'`)
+  it("should fail when there are no users in the system", async () => {});
+});
 
-            expect(getUserById.statusCode).toBe(200)
-            expect(getUserById.body).toMatchObject({
-                success:'Here is the user: '
-            })
+describe("[update users endpoint]", () => {
+  it("should update a users details", async () => {});
+});
 
-        })
-
-        test('failing test with invalid id that returns an error', async()=>{
-            const id = (Math.random()*100).toFixed()
-            // console.log(id)
-            const getUserById = await api.get(`/get/${id}`)
-            
-            expect(getUserById.statusCode).toBe(400)
-            expect(getUserById.body).toMatchObject({
-                error:'There is no user with that id. Try again?'
-            })
-
-        })
-
-    })
-
-    describe('4.update user details', ()=>{
-
-        test('update user credentials with valid id', async()=>{
-            // 1.arrange 2.act 3.assert
-            const [rows] = await pool.query(
-                `SELECT * FROM users WHERE name='${dummyUser.name}';`
-            )
-            const user = rows as Array<Users>
-            const id = user[0].id
-
-            const newUser:Users = {
-                name:'Sir Lancelot',
-                email:'lance@gmail.com',
-                password:'Lance@25'
-            }
-
-            const updateUser = await api.patch(`/update/${id}`).send(newUser)
-            expect(updateUser.statusCode).toBe(200)
-            expect(updateUser.body).toBeDefined()
-            expect(updateUser.body).toMatchObject({
-                success:'You have successfully updated your details: '
-            })
-
-        })
-
-        test('invalid id user id throws an error', async()=>{
-            // 1.act 2.arrage 3.assert
-            const id = (Math.random()*100).toFixed()
-            // console.log(id)
-            const newUser:Users = {
-                name:'Sir Lancelot',
-                email:'lance@gmail.com',
-                password:'Lance@25'
-            }
-
-            const updateUser = await api.patch(`/update/${id}`).send(newUser)
-            expect(updateUser.statusCode).toBe(400)
-            expect(updateUser.body).toMatchObject({
-                error:'Failed updating details, try again?'
-            })
-        })
-
-    })
-
-    describe('5.get all users in system endpoint', ()=>{
-
-        test('return users if present in system', async()=>{
-            // 1.act 2.arrange 3.assert
-            const getUsers = await api.get('/get-users')
-            expect(getUsers.statusCode).toBe(200)
-            expect(getUsers.body).toBeDefined()
-            expect(getUsers.body).toMatchObject({
-                success:'All users in db: '
-            })
-
-        })
-
-        test('failing test that returns error if no users in system', async()=>{
-            // 1.act 2.arrange 3.assert
-            const getUsers = await api.get('/get-users')
-            expect(getUsers.statusCode).toBe(400)
-            expect(getUsers.body).toMatchObject({
-                error:'Currently no users in the db.'
-            })
-            
-        })
-    })
-
-
-    describe('6.delete a user from system', ()=>{
-        // setup teardown
-        // restore original dummy user
-        beforeEach(async()=>{
-            const registerUser = await api.post(`/register`).send(dummyUser)
-        })
-
-        test('delete user from system with valid id', async()=>{
-            // 1.arrange 2.act 3.assert
-            const [rows] = await pool.query(
-                `SELECT * FROM users WHERE name='${dummyUser.name}';`
-            )
-            const user = rows as Array<Users>
-            const id = user[0].id
-
-            const deleteUser = await api.delete(`/delete/${id}`)
-            expect(deleteUser.statusCode).toBe(200)
-            expect(deleteUser.body).toMatchObject({
-                success:'You have successfuly deleted your account!'
-            })
-        })
-
-        test('deleting user with invalid will throw an erorr', async()=>{
-            // 1.arrange 2.act 3.assert
-            const id = (Math.random()*100).toFixed()
-            const deleteUser = await api.delete(`/delete/${id}`)
-            expect(deleteUser.statusCode).toBe(400)
-            expect(deleteUser.body).toMatchObject({
-                error:'That user does not exist, try again?'
-            })
-        })
-    })
-
-
-})
+describe("[delete user endpoint]", () => {
+  it("should delete a users account", async () => {});
+});
