@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Router } from "express";
-import { pool } from "./db";
+import { pool } from "../config/db.config";
 import { Users } from "./models";
 
 const router = Router();
@@ -35,7 +35,8 @@ router.post("/register", async (request: Request, response: Response) => {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message: "An internal server error occurred while processing the request.",
+      message:
+        "An internal server error occurred while processing the request.",
       data: error,
       metadata: {},
     });
@@ -83,7 +84,8 @@ router.post("/login", async (request: Request, response: Response) => {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message: "An internal server error has occurred while processing your request",
+      message:
+        "An internal server error has occurred while processing your request",
       data: error,
       metadata: {},
     });
@@ -121,7 +123,8 @@ router.get("/get-users", async (request: Request, response: Response) => {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message: "An internal server error occurred while processing your request.",
+      message:
+        "An internal server error occurred while processing your request.",
       data: error,
       metadata: {},
     });
@@ -129,7 +132,9 @@ router.get("/get-users", async (request: Request, response: Response) => {
 });
 
 // getUserById
-router.get("/get/:id", async (request: Request<{ id: string }>, response: Response) => {
+router.get(
+  "/get/:id",
+  async (request: Request<{ id: string }>, response: Response) => {
     const id = request.params.id;
     try {
       const [getUserById] = await pool.query(
@@ -159,7 +164,7 @@ router.get("/get/:id", async (request: Request<{ id: string }>, response: Respon
         data: {
           user: {
             id: `${id}`,
-         },
+          },
         },
         metadata: {},
       });
@@ -167,7 +172,8 @@ router.get("/get/:id", async (request: Request<{ id: string }>, response: Respon
       return response.status(500).json({
         status: "error",
         code: 500,
-        message: "An internal server error occured while processing your request",
+        message:
+          "An internal server error occured while processing your request",
         data: error,
         metadata: {},
       });
@@ -176,7 +182,9 @@ router.get("/get/:id", async (request: Request<{ id: string }>, response: Respon
 );
 
 // updateUser
-router.put("/update/:id", async (request: Request<{ id: string }>, response: Response) => {
+router.put(
+  "/update/:id",
+  async (request: Request<{ id: string }>, response: Response) => {
     try {
       const id = request.params.id;
       const { name, email, password } = request.body;
@@ -227,7 +235,8 @@ router.put("/update/:id", async (request: Request<{ id: string }>, response: Res
       return response.status(500).json({
         status: "error",
         code: 500,
-        message: "An internal server error occurred while processing your request",
+        message:
+          "An internal server error occurred while processing your request",
         data: error,
         metadata: {},
       });
@@ -236,7 +245,9 @@ router.put("/update/:id", async (request: Request<{ id: string }>, response: Res
 );
 
 // deleteUser
-router.delete("/delete/:id", async (request: Request<{ id: string }>, response: Response) => {
+router.delete(
+  "/delete/:id",
+  async (request: Request<{ id: string }>, response: Response) => {
     try {
       const id = request.params.id;
       const [deleteUser] = await pool.query(
@@ -270,7 +281,8 @@ router.delete("/delete/:id", async (request: Request<{ id: string }>, response: 
       return response.status(500).json({
         status: "error",
         code: 500,
-        message: "An internal server error occurred while processing your request",
+        message:
+          "An internal server error occurred while processing your request",
         data: error,
         metadata: {},
       });
@@ -278,15 +290,15 @@ router.delete("/delete/:id", async (request: Request<{ id: string }>, response: 
   },
 );
 
-// 404 routes
-router.get("*", async (request: Request, response: Response) => {
-  response.status(404).json({
-    status: "error",
-    code: 404,
-    message: "Oops! That route does not exist. Try something different?",
-    data: {},
-    metadata: {},
-  });
-});
+//// 404 routes
+//router.get("*", async (request: Request, response: Response) => {
+//  response.status(404).json({
+//    status: "error",
+//    code: 404,
+//    message: "Oops! That route does not exist. Try something different?",
+//    data: {},
+//    metadata: {},
+//  });
+//});
 
 export default router;

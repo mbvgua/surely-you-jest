@@ -1,9 +1,10 @@
-import mysql, { PoolOptions } from "mysql2/promise";
-import dotenv from "dotenv";
+import mysql from "mysql2/promise";
+import dotenvx from "@dotenvx/dotenvx";
+import { sqlConfiguration } from "../api/models";
 
-dotenv.config();
+dotenvx.config();
 
-const sqlConfig = {
+const sqlConfig: sqlConfiguration = {
   host: "localhost",
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,

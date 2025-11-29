@@ -3,11 +3,10 @@ CREATE DATABASE jest;
 USE jest;
 
 CREATE TABLE users(
-    id INT AUTO_INCREMENT,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) UNIQUE,
     email VARCHAR(100) UNIQUE,
     password VARCHAR(100),
-    PRIMARY KEY (id)
 );
 
 -- some dummy users
