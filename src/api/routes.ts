@@ -1,7 +1,6 @@
-import { Request, Response } from "express";
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import { pool } from "../config/db.config";
-import { Users } from "./models";
+import { IUsers } from "./models";
 
 const router = Router();
 
@@ -10,12 +9,8 @@ router.post("/register", async (request: Request, response: Response) => {
   try {
     const { name, email, password } = request.body;
     const registerUser = await pool.query(
-      `INSERT INTO users VALUES(
-            DEFAULT,
-            '${name}',
-            '${email}',
-            '${password}'
-            );`,
+      "INSERT INTO users(name,email,password) VALUES(?,?,?);",
+      [name, email, password],
     );
 
     return response.status(201).json({
@@ -24,21 +19,19 @@ router.post("/register", async (request: Request, response: Response) => {
       message: "You have successfuly created a new user!",
       data: {
         user: {
-          name: `${name}`,
-          email: `${email}`,
-          password: `${password}`,
+          name: name,
+          email: email,
         },
       },
-      metadata: {},
+      metadata: null,
     });
   } catch (error) {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message:
-        "An internal server error occurred while processing the request.",
+      message: "An internal server error occurred",
       data: error,
-      metadata: {},
+      metadata: null,
     });
   }
 });
@@ -48,10 +41,10 @@ router.post("/login", async (request: Request, response: Response) => {
   try {
     const { name, password } = request.body;
     const [loginUser] = await pool.query(
-      `SELECT * FROM users WHERE
-             name='${name}' AND password='${password}';`,
+      "SELECT * FROM users WHERE name=? AND password=?;",
+      [name, password],
     );
-    const user = loginUser as Array<Users>;
+    const user = loginUser as Array<IUsers>;
     if (user && user.length > 0) {
       return response.status(201).json({
         status: "success",
@@ -59,13 +52,12 @@ router.post("/login", async (request: Request, response: Response) => {
         message: "You have successfully logged in!",
         data: {
           user: {
-            id: `${user[0].id}`,
-            name: `${name}`,
-            email: `${user[0].email}`,
-            password: `${password}`,
+            id: user[0].id,
+            name: name,
+            email: user[0].email,
           },
         },
-        metadata: {},
+        metadata: null,
       });
     }
     return response.status(422).json({
@@ -74,20 +66,19 @@ router.post("/login", async (request: Request, response: Response) => {
       message: "Incorect username or password, try again?",
       data: {
         user: {
-          name: `${name}`,
-          password: `${password}`,
+          name: name,
+          password: password,
         },
       },
-      metadata: {},
+      metadata: null,
     });
   } catch (error) {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message:
-        "An internal server error has occurred while processing your request",
-      data: error,
-      metadata: {},
+      message: "An internal server error occurred",
+      data: { error },
+      metadata: null,
     });
   }
 });
@@ -95,8 +86,8 @@ router.post("/login", async (request: Request, response: Response) => {
 // getUsers
 router.get("/get-users", async (request: Request, response: Response) => {
   try {
-    const [getUsers] = await pool.query(`SELECT * FROM users;`);
-    const users = getUsers as Array<Users>;
+    const [getUsers] = await pool.query("SELECT * FROM users;");
+    const users = getUsers as Array<IUsers>;
     if (users && users.length > 0) {
       return response.status(200).json({
         status: "success",
@@ -117,16 +108,15 @@ router.get("/get-users", async (request: Request, response: Response) => {
       data: {
         users: {},
       },
-      metadata: {},
+      metadata: null,
     });
   } catch (error) {
     return response.status(500).json({
       status: "error",
       code: 500,
-      message:
-        "An internal server error occurred while processing your request.",
+      message: "An internal server error occurred",
       data: error,
-      metadata: {},
+      metadata: null,
     });
   }
 });
@@ -138,9 +128,10 @@ router.get(
     const id = request.params.id;
     try {
       const [getUserById] = await pool.query(
-        `SELECT * FROM users WHERE id=${id};`,
+        "SELECT * FROM users WHERE id=?;",
+        [id],
       );
-      const user = getUserById as Array<Users>;
+      const user = getUserById as Array<IUsers>;
       if (user && user.length > 0) {
         return response.status(200).json({
           status: "success",
@@ -148,13 +139,12 @@ router.get(
           message: `You have successfully retrieved user of id:${id} from the database`,
           data: {
             user: {
-              id: `${id}`,
-              name: `${user[0].name}`,
-              email: `${user[0].email}`,
-              password: `${user[0].password}`,
+              id: id,
+              name: user[0].name,
+              email: user[0].email,
             },
           },
-          metadata: {},
+          metadata: null,
         });
       }
       return response.status(404).json({
@@ -163,19 +153,18 @@ router.get(
         message: "There is no user with that id. Try again?",
         data: {
           user: {
-            id: `${id}`,
+            id: id,
           },
         },
-        metadata: {},
+        metadata: null,
       });
     } catch (error) {
       return response.status(500).json({
         status: "error",
         code: 500,
-        message:
-          "An internal server error occured while processing your request",
+        message: "An internal server error occurred",
         data: error,
-        metadata: {},
+        metadata: null,
       });
     }
   },
@@ -188,19 +177,15 @@ router.put(
     try {
       const id = request.params.id;
       const { name, email, password } = request.body;
-      const [updateUser] = await pool.query(
-        `SELECT * FROM users WHERE id='${id}';`,
-      );
-      const user = updateUser as Array<Users>;
+      const [updateUser] = await pool.query("SELECT * FROM users WHERE id=?;", [
+        id,
+      ]);
+      const user = updateUser as Array<IUsers>;
 
       if (user.length > 0) {
         await pool.query(
-          `UPDATE users SET 
-                name='${name}',
-                email='${email}',
-                password='${password}' 
-                WHERE id='${id}'
-                ;`,
+          "UPDATE users SET name=?,email=?,password=? WHERE id=?;",
+          [name, email, password, id],
         );
         return response.status(201).json({
           status: "success",
@@ -208,13 +193,12 @@ router.put(
           message: "You have successfully updated your details.",
           data: {
             user: {
-              id: `${id}`,
-              name: `${name}`,
-              email: `${email}`,
-              password: `${password}`,
+              id: id,
+              name: name,
+              email: email,
             },
           },
-          metadata: {},
+          metadata: null,
         });
       }
       return response.status(404).json({
@@ -223,22 +207,20 @@ router.put(
         message: `User of id:${id} was not found. Failed updating details, try again later?`,
         data: {
           user: {
-            id: `${id}`,
-            name: `${name}`,
-            email: `${email}`,
-            password: `${password}`,
+            id: id,
+            name: name,
+            email: email,
           },
         },
-        metadata: {},
+        metadata: null,
       });
     } catch (error) {
       return response.status(500).json({
         status: "error",
         code: 500,
-        message:
-          "An internal server error occurred while processing your request",
+        message: "An internal server error occurred",
         data: error,
-        metadata: {},
+        metadata: null,
       });
     }
   },
@@ -250,12 +232,12 @@ router.delete(
   async (request: Request<{ id: string }>, response: Response) => {
     try {
       const id = request.params.id;
-      const [deleteUser] = await pool.query(
-        `SELECT * FROM users WHERE id=${id};`,
-      );
-      const user = deleteUser as Array<Users>;
+      const [deleteUser] = await pool.query(`SELECT * FROM users WHERE id=?;`, [
+        id,
+      ]);
+      const user = deleteUser as Array<IUsers>;
       if (user.length > 0) {
-        await pool.query(`DELETE FROM users WHERE id=${user[0].id};`);
+        await pool.query("DELETE FROM users WHERE id=?;", [user[0].id]);
         return response.status(204).json({
           status: "error",
           code: 204,
@@ -263,7 +245,7 @@ router.delete(
           data: {
             user: {},
           },
-          metadata: {},
+          metadata: null,
         });
       }
       return response.status(404).json({
@@ -272,33 +254,21 @@ router.delete(
         message: "That user does not exist, try again?",
         data: {
           user: {
-            id: `${id}`,
+            id: id,
           },
         },
-        metadata: {},
+        metadata: null,
       });
     } catch (error) {
       return response.status(500).json({
         status: "error",
         code: 500,
-        message:
-          "An internal server error occurred while processing your request",
+        message: "An internal server error occurred",
         data: error,
-        metadata: {},
+        metadata: null,
       });
     }
   },
 );
-
-//// 404 routes
-//router.get("*", async (request: Request, response: Response) => {
-//  response.status(404).json({
-//    status: "error",
-//    code: 404,
-//    message: "Oops! That route does not exist. Try something different?",
-//    data: {},
-//    metadata: {},
-//  });
-//});
 
 export default router;

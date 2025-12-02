@@ -1,8 +1,8 @@
-export interface Users {
+export interface IUsers {
   id?: string;
-  name?: string;
-  email?: string;
-  password?: string;
+  name: string;
+  email: string;
+  password: string;
 }
 
 export interface sqlConfiguration {
