@@ -46,9 +46,9 @@ router.post("/login", async (request: Request, response: Response) => {
     );
     const user = loginUser as Array<IUsers>;
     if (user && user.length > 0) {
-      return response.status(201).json({
+      return response.status(200).json({
         status: "success",
-        code: 201,
+        code: 200,
         message: "You have successfully logged in!",
         data: {
           user: {
@@ -136,7 +136,7 @@ router.get(
         return response.status(200).json({
           status: "success",
           code: 200,
-          message: `You have successfully retrieved user of id:${id} from the database`,
+          message: `You have successfully retrieved user of id:${id}.`,
           data: {
             user: {
               id: id,
@@ -206,11 +206,7 @@ router.put(
         code: 404,
         message: `User of id:${id} was not found. Failed updating details, try again later?`,
         data: {
-          user: {
-            id: id,
-            name: name,
-            email: email,
-          },
+          user: {},
         },
         metadata: null,
       });
@@ -239,7 +235,7 @@ router.delete(
       if (user.length > 0) {
         await pool.query("DELETE FROM users WHERE id=?;", [user[0].id]);
         return response.status(204).json({
-          status: "error",
+          status: "success",
           code: 204,
           message: "You have successfuly deleted your account!",
           data: {
