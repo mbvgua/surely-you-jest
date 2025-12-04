@@ -1,5 +1,5 @@
 # register new user
-POST http://localhost:5000/register
+POST http://localhost:4000/register
 Content-Type: application/json
 
 {
@@ -11,28 +11,28 @@ Content-Type: application/json
 
 ###
 # login existing user
-POST http://localhost:5000/login
+POST http://localhost:4000/login
 Content-Type: application/json
 
 {
-    "name":"Biggie",
+    "name":"Marka",
     "password":"Biggie@2025"
 }
 
 
 ###
 # get all users
-GET http://localhost:5000/get-users
+GET http://localhost:4000/get-users
 
 
 ###
 # get user by id
-GET http://localhost:5000/get/2
+GET http://localhost:4000/get/2
 
 
 ###
 # update user by id
-PUT http://localhost:5000/update/5
+PUT http://localhost:4000/update/5
 Content-Type: application/json
 
 {
@@ -43,8 +43,5 @@ Content-Type: application/json
 
 ###
 # delete user by id
-DELETE http://localhost:5000/delete/7
+DELETE http://localhost:4000/delete/7
 
-###
-# wrong route
-GET http://localhost:5000/cqwdcaxa

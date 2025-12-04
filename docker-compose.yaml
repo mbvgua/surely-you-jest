@@ -1,0 +1,29 @@
+services:
+
+  backend:
+    container_name: surely-you-jest-backend
+    image: mbvgua/surely-you-jest
+    ports:
+      - 4000:4000
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST}
+    depends_on:
+    - database
+
+  database:
+    container_name: surely-you-jest-database
+    build:
+      context: database
+      dockerfile: ./Dockerfile
+    ports:
+      - 3307:3306
+    restart: unless-stopped
+    environment:
+    - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - jest_db:/var/lib/mysql
+
+volumes:
+  jest_db:
+

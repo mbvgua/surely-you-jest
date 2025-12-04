@@ -1,10 +1,14 @@
-import mysql, { PoolOptions } from "mysql2/promise";
-import dotenv from "dotenv";
+import mysql from "mysql2/promise";
+import dotenvx from "@dotenvx/dotenvx";
+import { sqlConfiguration } from "../api/models";
 
-dotenv.config();
+dotenvx.config();
 
-const sqlConfig = {
-  host: "localhost",
+const sqlConfig: sqlConfiguration = {
+  //NOTE: the 'host' variable is not passed in the backend.env, instead it will
+  // be passed in the docker-compose.yaml .env, allowing the container to connect
+  // either on the localhost or from the docker container if need be
+  host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
